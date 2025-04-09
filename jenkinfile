@@ -1,0 +1,42 @@
+pipeline {
+    agent any
+
+    environment {
+        KUBECONFIG = '/var/lib/jenkins/.kube/config'
+    }
+
+    stages {
+
+        stage('Git Checkout') {
+            steps {
+                git 'https://github.com/shubham93096/myweb.git'
+            }
+        }
+
+        stage('Maven Build') {
+            steps {
+                sh 'mvn clean package'
+            }
+        }
+
+        stage('Docker Image Build') {
+            steps {
+                sh 'docker build . -t myimage_13'
+            }
+        }
+
+        stage('Docker Tag & Push') {
+            steps {
+                sh 'docker tag myimage_13 lokesh6509/myimage_13'
+                sh 'docker push lokesh6509/myimage_13'
+            }
+        }
+
+        stage('kubectl deployment') {
+            steps {
+                sh 'kubectl apply -f deployments.yml'
+            }
+        }
+
+    }
+}
